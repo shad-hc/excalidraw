@@ -12,7 +12,7 @@ type shape = {
     radius : number
 }
 
-export default function initDraw(canvas : HTMLCanvasElement){
+export default async function initDraw(canvas : HTMLCanvasElement,roomId : string){
         const ctx = canvas.getContext("2d");
 
         if(!ctx){
@@ -21,8 +21,8 @@ export default function initDraw(canvas : HTMLCanvasElement){
 
         ctx.fillStyle = "rgba(0,0,0)";
         ctx.fillRect(0,0,canvas.width,canvas.height);
-
-        let existingShapes : shape[] = [];
+        let existingShapes : shape[] = await getExistingShapes(roomId);
+        clearCanvas(existingShapes,canvas,ctx);
 
         let startX = 0;
         let startY = 0;
@@ -71,10 +71,14 @@ function clearCanvas(existingShapes :shape[],canvas : HTMLCanvasElement,ctx :Can
     })
 }
 
-// async function getExistingShapes(roomId : string){
-//    const res = await axios.get("http;//localhost;3001");
-//    const messges = res.data.messges;
+ async function getExistingShapes(roomId : string){
+    const res = await axios.get("http;//localhost;3001");
+    const messages = res.data.messges;
 
-//    const shapes = messages.map
-// }
+    const shapes = messages.map((x : {message : string}) => {
+        const shapeData =  JSON.parse(x.message);
+        return shapeData;
+    })
+    return shapes;
+ }
 
