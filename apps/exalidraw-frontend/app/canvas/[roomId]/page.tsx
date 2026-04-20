@@ -1,4 +1,4 @@
-import Canvas from "@/components/canvas";
+import RoomCanvas from "@/components/RoomCanvas";
 
 export default async function CanvasPage({ params } : {
    params : {
@@ -6,5 +6,5 @@ export default async function CanvasPage({ params } : {
    }
 }) {
     const roomId = (await params).roomId;
-   return <Canvas roomId = {roomId}></Canvas>
+   return <RoomCanvas roomId = {roomId}></RoomCanvas>
 }

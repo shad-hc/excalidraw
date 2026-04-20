@@ -12,7 +12,6 @@ interface User {
 }
 
 const users: User[] = [];
-
 function checkUser(token: string): string | null {
     const decoded = jwt.verify(token, JWT_SECRET);
     if (typeof decoded == "string") {
@@ -44,7 +43,12 @@ wss.on("connection", function (ws, request) {
         ws
     })
     ws.on("message", async(data) => {
-        const parsedData = JSON.parse(data as unknown as string);
+        let parsedData;
+        if(typeof data !== "string"){
+            parsedData = JSON.parse(data.toString());
+        }else{
+            parsedData = JSON.parse(data);
+        }
         if (parsedData.type == "join_room") {
             const user = users.find(x => x.ws === ws);
             user?.rooms.push(parsedData.roomId);
@@ -62,6 +66,13 @@ wss.on("connection", function (ws, request) {
             const roomId = parsedData.roomId;
             const message = parsedData.message;
 
+            await prismaClient.chat.create({
+                data : {
+                    userId,
+                    message,
+                    roomId
+                }
+            })
             users.forEach(user => {
                 if(user.rooms.includes(roomId)){
                     user.ws.send(JSON.stringify({

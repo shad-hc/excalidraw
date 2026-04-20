@@ -1,6 +1,7 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import z from "zod"
+import cors from "cors"
 import { JWT_SECRET } from "@repo/backend-common/config"
 import { createUserSchema, roomSchema, siginSchema } from "@repo/common/types"
 import { authMiddleware } from "./middleware";
@@ -8,7 +9,7 @@ import bcrypt from "bcrypt";
 import { prismaClient } from "@repo/db/client"
 const app = express();
 
-
+app.use(cors());
 app.post("/signup", async function (req, res) {
   const parsedData = createUserSchema.safeParse(req.body);
   if (!parsedData.success) {
@@ -96,6 +97,36 @@ app.post("/room", authMiddleware, async function (req, res) {
     message : "room already exists"
   })
 }
+})
+
+app.get("chats/:roomId" ,async function(req,res){
+  const roomId = Number(req.params.roomId);
+
+  const chats = await prismaClient.chat.findMany({
+    where :{
+      roomId : roomId
+    },
+    orderBy : {
+      id : "desc"
+    },
+    take : 50
+  })
+  res.json({
+    chats
+  })
+})
+
+app.get("/room/:slug" ,async function(req,res){
+  const slug = req.params.slug;
+  const room = await prismaClient.findFirst({
+    where : {
+      slug : slug
+    }
+  })
+
+  res.json({
+    room
+  })
 })
 
 app.listen(3000);
